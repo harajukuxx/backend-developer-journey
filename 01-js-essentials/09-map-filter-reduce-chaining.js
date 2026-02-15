@@ -73,7 +73,7 @@ const sumPrice = orders
     .map(order => order.price*0.9)
     .reduce((acc,curr) => acc + curr ,0)
 
-    /*
+    /* ถ้า Chain ยาวๆ แล้วผลลัพธ์ไม่ตรง เราจะเช็คทีละขั้นยังไง? มือโปรมักจะใส่ console.log แทรกเข้าไปใน map แบบชั่วคราวครับ:
     .map(order => {
         const discounted = order.price * 0.9;
         // console.log(`Item: ${order.product}, New Price: ${discounted}`); // เอาไว้เช็คค่า
