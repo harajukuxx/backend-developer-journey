@@ -84,3 +84,21 @@ console.log(inventory.indexOf("Samsung"))
 
 const prices = [150, 450, 200, 800, 120];
 console.log(prices.find(price => price >= 500))
+
+
+//some every
+const fruits = ['apple', 'rotten banana', 'orange'];
+
+const hasRottenFruit = fruits.some((fruit) => {
+  return fruit.includes('rotten');
+});
+
+console.log(hasRottenFruit); // true
+
+const ages = [20, 25, 17, 30];
+
+const isAllAdults = ages.every((age) => {
+  return age >= 18;
+});
+
+console.log(isAllAdults); // false (เพราะมีคนอายุ 17)
