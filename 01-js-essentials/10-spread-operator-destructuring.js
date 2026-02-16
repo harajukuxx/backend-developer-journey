@@ -251,3 +251,87 @@ const {
 console.log(isAdmin);    // true
 console.log(email);      // true (เพราะใน userConfig มีค่าเป็น true เลยไม่ใช้ "Default")
 console.log(otherPrefs); // { layout: "grid" }
+
+//Day 2 ทบทวน
+
+/*
+โจทย์ข้อที่ 1: ฟังก์ชันตั้งค่ากราฟ (Default Values)
+สถานการณ์: ให้คุณสร้างฟังก์ชันชื่อ createChart ที่รับ Parameter เป็น Object เพียงตัวเดียว
+เงื่อนไข: 1. ให้ใช้ Destructuring ที่ Parameter เพื่อรับค่า type และ width
+2. กำหนด Default Value ให้ type เป็น 'bar'
+3. กำหนด Default Value ให้ width เป็น 500
+4. ภายในฟังก์ชันให้ console.log ว่า: "Creating [type] chart with width [width]px"
+JavaScript
+*/
+// --- เขียนฟังก์ชัน createChart ของคุณด้านล่างนี้ ---
+
+function createChart({type = "bar",width = 500}) {
+    console.log(`Creating ${type} chart with width ${width}px`)
+}
+
+createChart({type:"OK"})
+
+
+/*
+โจทย์ข้อที่ 2: ระบบแจ้งเตือน (Nested & Error Proof)
+สถานการณ์: คุณต้องเขียนฟังก์ชัน sendNotification ที่รับ Object ข้อมูลการแจ้งเตือน
+เงื่อนไข:
+ทำ Destructuring เพื่อดึงค่า message และ status
+กำหนดค่าเริ่มต้นให้ status เป็น 'info'
+สำคัญ: ต้องทำให้ฟังก์ชันนี้ ไม่ Error แม้ว่าคนเรียกจะลืมส่ง Object มาเลย (เช่น เรียก sendNotification()) โดยการใช้ = {} ต่อท้าย Parameter
+ภายในฟังก์ชันให้ console.log ว่า: "[STATUS]: message"
+JavaScript
+// --- เขียนฟังก์ชัน sendNotification ของคุณด้านล่างนี้ ---
+*/
+
+/*
+function sendNotification({status="info"}) {
+    if(status==="success"){
+        console.log(`[${status}]: ${message}`)
+    }else if(status==="info" && message != {}){
+        console.log(`[${status}]: ${message}`)
+    }else{
+        console.log(`[${status}]: undefined`)
+    }
+}
+*/
+
+// 1. ดึงทั้ง message และ status ออกมา
+// 2. ใส่ = {} ไว้ข้างหลัง เพื่อกัน Error กรณีเรียก sendNotification() เฉยๆ
+function sendNotification({ message, status = "info" } = {}) {
+    
+    // ถ้า message ไม่มีค่า (เป็น undefined) ให้แสดงคำว่า undefined ตามโจทย์
+    if (message) {
+        console.log(`[${status}]: ${message}`);
+    } else {
+        console.log(`[${status}]: undefined`);
+    }
+}
+
+// --- ทดสอบ ---
+sendNotification({ message: "Hello", status: "success" }); // [success]: Hello
+sendNotification({ message: "System update" });            // [info]: System update
+sendNotification();                                        // [info]: undefined (ไม่ Error แล้ว!)
+
+/*
+ลองโจทย์ข้อนี้ครับ (ผสมทุกอย่าง):
+โจทย์: มี Object ข้อมูลนักเรียน ให้ดึง province ออกมา แต่ให้ตั้งชื่อตัวแปรใหม่ว่า location และถ้าไม่มีข้อมูล ให้ Default เป็น "Unknown"
+
+JavaScript
+*/
+const student = {
+    name: "A",
+    contact: {
+        address: {
+            // province: "Chiang Mai" // สมมติว่าบรรทัดนี้หายไป
+        }
+    }
+};
+
+// ลองเขียน Destructuring เพื่อดึง province ออกมาเป็นตัวแปร location และใส่ Default ครับ
+
+// เจาะลึกลงไปที่ province : เปลี่ยนชื่อเป็น location = ใส่ค่า Default
+const { contact: { address: { province: location = "Unknown" } } } = student;
+
+console.log(location); // Output: Unknown
+
