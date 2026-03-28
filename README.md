@@ -14,8 +14,8 @@ Tracking my progress, daily coding challenges, and production-ready projects.
 
 | Month | Topic | Status |
 | :--- | :--- | :--- |
-| **M1** | Programming Foundation (JS Essentials) | 🏗️ In Progress |
-| **M2** | Node.js & Express.js (The Core) | ⏳ Pending |
+| **M1** | Programming Foundation (JS Essentials) | ✅ Completed (W3) |
+| **M2** | Node.js & Express.js (The Core) | 🏗️ Next Step |
 | **M3** | Databases (SQL/NoSQL) & ORM | ⏳ Pending |
 | **M4** | TypeScript & Backend Security | ⏳ Pending |
 | **M5** | Testing & Specialized Tools | ⏳ Pending |
@@ -27,10 +27,9 @@ Tracking my progress, daily coding challenges, and production-ready projects.
 เน้นการจัดการ Logic, Data Structures และ Asynchronous Programming
 
 ### Weekly Focus
-- [ ] **Week 1: Basic & Objects** (Variables, Logic, Object/Array Basics)
-- [ ] **Week 2: Functional Power** (Arrow Functions, Array Methods, Destructuring)
-- [ ] **Week 3: Asynchronous JS** (Promises, Async/Await, Error Handling)
-- [ ] **Week 4: Real-world Logic** (JSON, Date Methods, Final JS Project)
+- [x] **Week 1-2: Logic & Functional Power** (Variables, Logic, Array Methods)
+- [x] **Week 3: Asynchronous JS** (Promises, Async/Await, Error Handling, Fetch API)
+- [ ] **Week 4: Final JS Project & Clean Code** (Project Organization & Git)
 
 ---
 
