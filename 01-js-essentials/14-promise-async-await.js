@@ -335,28 +335,180 @@ function getcoffee() {
 cooking();
 
 
+//ทบทวน Promise.all Promise.allSettled
+//สำเร็จ: ต้องสำเร็จ "ทุกตัว" ถึงจะส่งค่ากลับมาเป็น Array ตามลำดับที่ใส่ไป
+//ล้มเหลว: ถ้ามีตัวใดตัวหนึ่ง reject (พัง) เพียงตัวเดียว... พังทั้งหมดทันที! (มันจะกระโดดไปที่ catch ทันทีโดยไม่สนว่าตัวอื่นจะเสร็จหรือไม่)
+
+async function slowCook() {
+  const chickenRice = await makeChickenRice(); // รอ 5 นาที
+  const soup = await makeSoup(); // รอ 2 นาที
+  const drink = await makeDrink(); // รอ 1 นาที
+  // รวมเสียเวลา: 8 นาที 🐢
+}
+
+async function serveSetMenu() {
+  try {
+    console.log("👨‍🍳 เริ่มทำอาหารพร้อมกันทุกอย่าง...");
+
+    const [chickenRice, soup, drink] = await Promise.all([
+      makeChickenRice(), // 5 นาที
+      makeSoup(),        // 2 นาที
+      makeDrink()        // 1 นาที
+    ]);
+
+    // ถ้าผ่านหมด จะได้ค่ากลับมาเป็น Array ตามลำดับที่เราใส่ไป
+    console.log(`✅ เสิร์ฟชุดอาหาร: ${chickenRice}, ${soup}, ${drink}`);
+    
+  } catch (error) {
+    console.error("❌ ยกเลิกออเดอร์เพราะ:", error);
+  }
+}
+
+//ตัวอย่างการใช้งานจริง (Workshop เล็กๆ)
+async function getDashboardData() {
+  try {
+    console.log("⏳ กำลังดึงข้อมูลทั้งหมด...");
+
+    const [user, posts, weather] = await Promise.all([
+      fetch("https://api.com/user").then(res => res.json()),
+      fetch("https://api.com/posts").then(res => res.json()),
+      fetch("https://api.com/weather").then(res => res.json())
+    ]);
+
+    console.log("✅ ข้อมูลครบแล้ว:", { user, posts, weather });
+  } catch (error) {
+    console.error("❌ มีบางอย่างพัง! ดึงข้อมูลไม่ครบ:", error);
+  }
+}
+
+//QUIZ 1
+
+// 1. ฟังก์ชันดึง Profile (สำเร็จ - 1 วิ)
+function getProfile() {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve("👤 ข้อมูลณัฐพงศ์"), 1000);
+  });
+}
+
+// 2. ฟังก์ชันดึงเพื่อน (พัง! - 0.5 วิ)
+function getFriend() {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => reject("❌ Error: เซิร์ฟเวอร์เพื่อนล่ม!"), 500);
+  });
+}
+
+// 3. ฟังก์ชันดึง Setting (สำเร็จ - 2 วิ)
+function getSetting() {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve("⚙️ ตั้งค่าโหมดมืด"), 2000);
+  });
+}
+
+async function getData1() {
+  try {
+    console.log("🚀 เริ่มดึงข้อมูลทั้งหมด...");
+    
+    const [profile, friend, setting] = await Promise.all([
+      getProfile(),
+      getFriend(), // <--- ตัวนี้จะพังก่อนใครเพื่อน
+      getSetting()
+    ]);
+
+    console.log("✅ สำเร็จทั้งหมด:", profile, friend, setting);
+  } catch (error) {
+    // 💥 พอมันพังปุ๊บ มันจะกระโดดมาที่นี่ทันทีในนาทีที่ 0.5!
+    console.log("⚠️ จับ Error ได้แล้ว!");
+    console.log("สาเหตุที่พังคือ:", error); 
+  }
+}
+
+getData1();
 
 
+//allSettled
+/* สมมติว่าคุณกำลังทำ "หน้า Dashboard สรุปข้อมูลผู้ใช้" ของธนาคาร ซึ่งต้องดึงข้อมูล 3 อย่างพร้อมกัน:
+ยอดเงินในบัญชี (Balance) -> 💰 สำคัญมาก ห้ามพัง!
+รายการโอนล่าสุด (Transactions) -> 📝 สำคัญรองลงมา
+คะแนนสะสม/สิทธิพิเศษ (Rewards) -> 🎁 มีก็ดี ไม่มีก็ได้ (เช่น Server พาร์ทเนอร์ล่ม) 
 
+ถ้าใช้ Promise.all แล้ว Server คะแนนสะสมล่ม หน้าเว็บจะค้างและไม่โชว์ยอดเงินเลย (ซึ่งแย่มาก!) เราจึงต้องใช้ Promise.allSettled เพื่อ "เอาเท่าที่ได้" ครับ
+*/
 
+// 1. ดึงยอดเงิน (สำเร็จ - 1 วิ)
+const getBalance = () => new Promise(res => setTimeout(() => res(50000), 1000));
 
+// 2. ดึงรายการโอน (สำเร็จ - 1.5 วิ)
+const getTrans = () => new Promise(res => setTimeout(() => res(["โอนออก 500", "รับเข้า 1000"]), 1500));
 
+// 3. ดึงคะแนนสะสม (พัง! - 0.5 วิ เพราะ Server พาร์ทเนอร์ปิดปรับปรุง)
+const getRewards = () => new Promise((_, rej) => setTimeout(() => rej("Server Rewards ล่ม"), 500));
 
+async function loadDashboard() {
+  console.log("⏳ กำลังโหลดข้อมูล Dashboard...");
 
+  // ใช้ allSettled เพื่อรอจนจบทุกคน ไม่ว่าใครจะพัง
+  const results = await Promise.allSettled([
+    getBalance(),
+    getTrans(),
+    getRewards()
+  ]);
 
+  /* ผลลัพธ์ที่ได้ (results) จะเป็น Array ของ Object:
+    index 0: { status: "fulfilled", value: 50000 }
+    index 1: { status: "fulfilled", value: [...] }
+    index 2: { status: "rejected", reason: "Server Rewards ล่ม" }
+  */
 
+  // --- วิธีนำไปใช้งาน (แบบคัดกรอง) ---
 
+  const data = {
+    balance: results[0].status === "fulfilled" ? results[0].value : "ไม่อาจดึงข้อมูลได้",
+    transactions: results[1].status === "fulfilled" ? results[1].value : [],
+    rewards: results[2].status === "fulfilled" ? results[2].value : "ไม่มีข้อมูลคะแนน"
+  };
 
+  console.log("✅ สรุปหน้าจอ Dashboard:");
+  console.log(data);
 
+  if (results[2].status === "rejected") {
+    console.log("⚠️ หมายเหตุ: ระบบคะแนนสะสมขัดข้องชั่วคราว");
+  }
+}
 
+loadDashboard();
 
+//QUIZ 2
+/* "ระบบส่งแจ้งเตือน (Notification System)" ให้กับลูกค้า 3 คนพร้อมกัน โดยแต่ละคนมีช่องทางรับข้อมูลต่างกัน:
+ส่ง SMS (ใช้เวลา 1 วิ)
+ส่ง Email (ใช้เวลา 2 วิ)
+ส่ง Push Notification บนมือถือ (ใช้เวลา 0.5 วิ)
+โจทย์คือ: เราต้องการส่งให้ครบทุกคน ใครจะได้รับหรือไม่ได้รับ (พัง) ก็ช่างมัน แต่สุดท้ายต้องสรุปมาให้ได้ว่า "ใครผ่าน" และ "ใครร่วง" */
 
+// ฟังก์ชันจำลองการส่ง (ไม่ต้องแก้ส่วนนี้)
+const sendSMS = () => Promise.resolve("📱 SMS Sent");
+const sendEmail = () => Promise.reject("📧 Email Error: Address not found");
+const sendPush = () => Promise.resolve("🔔 Push Sent");
 
+async function notifyAll() {
+  console.log("🚀 กำลังเริ่มส่งแจ้งเตือน...");
 
+  // 1. ใช้คำสั่งอะไรดีที่ "รอจนจบทุกคน" ไม่ว่าใครจะพัง?
+  const results = await Promise.allSettled([
+    sendSMS(),
+    sendEmail(),
+    sendPush()
+  ]);
 
+  // 2. แสดงผลลัพธ์
+  results.forEach((result, index) => {
+    // 3. ตรวจสอบสถานะว่า "สำเร็จ" หรือไม่
+    if (result.status === "fulfilled") {
+      console.log(`รายการที่ ${index + 1}: สำเร็จ -> ${result.value}`);
+    } else {
+      // 4. ถ้าพัง ให้ดึงเหตุผลจาก Property ชื่อว่าอะไร?
+      console.log(`รายการที่ ${index + 1}: พลาด -> ${result.reason}`);
+    }
+  });
+}
 
-
-
-
-
-
+notifyAll();
