@@ -512,3 +512,88 @@ async function notifyAll() {
 }
 
 notifyAll();
+
+
+//แนะนำเทคนิคการใช้ Array.reduce หรือ Array.filter ร่วมกับ allSettled
+const results1 = await Promise.allSettled([getBalance1(), getBalance2(), getBalance3()]);
+
+// ✅ ดึงเฉพาะตัวที่ status เป็น fulfilled และเอาเฉพาะค่า value ออกมา
+const successfulBalances = results1
+  .filter(r => r.status === "fulfilled")
+  .map(r => r.value);
+
+console.log(successfulBalances); // [50000, 20000] (ตัวที่พังจะหายไปเลย)
+
+
+const results2 = await Promise.allSettled([send1, send2, send3]);
+
+const summary = results2.reduce((acc, result, index) => {
+  if (result.status === "fulfilled") {
+    acc.success.push({ id: index, data: result.value });
+  } else {
+    acc.failed.push({ id: index, error: result.reason });
+  }
+  return acc;
+}, { success: [], failed: [] }); // ค่าเริ่มต้นเป็น Object ที่มี Array 2 ชุด
+
+console.log("ส่งสำเร็จ:", summary.success.length);
+console.log("ส่งพลาด:", summary.failed);
+
+const hasError = results2.some(r => r.status === "rejected");
+if (hasError) console.log("⚠️ มีบางรายการทำงานไม่สำเร็จ");
+
+const isAllFailed = results2.every(r => r.status === "rejected");
+if (isAllFailed) console.log("🚨 ระบบล่มถาวร พังทุกตัว!");
+
+
+//"ระบบส่งซ่อม (Retry Logic)"
+// สมมติผลลัพธ์จากรอบแรกที่พัง (ดึงมาจาก summary.failed ของคุณ)
+// 1. ข้อมูลดิบจาก Promise.allSettled (สมมติผลลัพธ์)
+// 1. ผลลัพธ์สมมติจาก Promise.allSettled
+const results3 = [
+  { status: "fulfilled", value: "📱 SMS Sent" },
+  { status: "rejected", reason: "📧 Email Error: Timeout" }, // ID: 1 พัง
+  { status: "rejected", reason: "🔔 Push Sent: Server Down" }  // ID: 2 พัง
+];
+
+// 2. แยกกลุ่มด้วย Reduce3
+const summary3 = results3.reduce((acc, result, index) => {
+  if (result.status === "fulfilled") {
+    acc.success.push({ id: index, data: result.value });
+  } else {
+    acc.failed.push({ id: index, error: result.reason });
+  }
+  return acc;
+}, { success: [], failed: [] });
+
+// 3. ฟังก์ชันสำหรับส่งใหม่ retrySend3
+const retrySend3 = (id) => {
+  return new Promise((resolve) => {
+    console.log(`🔄 กำลังลองส่งใหม่รอบแก้ตัวสำหรับ ID: ${id}...`);
+    setTimeout(() => resolve(`✅ ID: ${id} ส่งสำเร็จในรอบที่สาม!`), 1500);
+  });
+};
+
+// 4. ฟังก์ชันรันระบบซ่อมแซม runRetryProcess3
+async function runRetryProcess3() {
+  // ดึงรายการที่พังมาจาก summary3.failed
+  const failedTasks3 = summary3.failed; 
+
+  if (failedTasks3.length === 0) {
+    console.log("✨ ไม่มีรายการพัง ไม่ต้องซ่อมแซม");
+    return;
+  }
+
+  console.log(`🛠️ พบรายการพัง ${failedTasks3.length} รายการ กำลังเริ่มระบบ Retry3...`);
+
+  // ใช้ map เพื่อสร้าง Promise สำหรับรายการที่พังทั้งหมด
+  const retryResults3 = await Promise.all(
+    failedTasks3.map(task => retrySend3(task.id))
+  );
+
+  console.log("🎊 สรุปผลการซ่อมแซมรอบที่ 3:");
+  retryResults3.forEach(res => console.log(res));
+}
+
+// เรียกใช้งาน
+runRetryProcess3();
